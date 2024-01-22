@@ -1,0 +1,146 @@
+Trivia! 
+
+Implement a trivia game where questions are read from an external file containing 21 Questions and Answers. 
+The program should load these questions along with its multiple choice correspodent and present them to the player one by one and record their responses with a lives and score system. 
+Players should be rewarded for correct anwsers with points depending on the level of the round, program should also display the  
+Importantly, the system should gracefully handle errors, such as invalid input o, providing informative error messages to aid troubleshooting
+
+"""
+import random  # importing random for the file values
+import time    # importing time to allow the user to read the prompts  
+
+
+with open('Questions1.txt', 'r') as questions_text:   # Read Questions from 'Questions1.txt'
+        questions = questions_text.readlines()
+
+with open('Answers.txt','r') as anwsers_text:        # Read Answers From'Trivia.txt'
+        answers  = anwsers_text.readlines()
+        
+
+'''
+First level -  4 points 4 Question
+Second Level - 3 points 4 Question
+Third Level  -  5 points 3Question
+
+'''
+
+print("")  # Description to participants
+
+print("Welcome to General Trivia! Here's how this works, There are 3 levels..") 
+time.sleep(1)
+print("the easiest level, Level 1 has 4 questions each worth 1 points,")   
+time.sleep(1)
+print("Level 2 (medium diff), has 4 questions but now worth 3 points each!!.")
+time.sleep(1)
+print("Level 3, the last and most difficult Level is 3 questions each worth 5 points....")
+time.sleep(1)
+print("Questions are given as multiple choice select ONLY 1 letter , you have a total of 4 lives throughout the game, if u make it...")
+
+
+
+        
+# Initializing the question number and the value that will be displayed
+def display_question(Question_num, value): 
+    time.sleep(1)
+    print(f'\nQuestion {Question_num}')
+    print("------------\n")
+    print(questions[value] )
+    print(questions[value + 1])
+
+    
+def get_user():  # Define User Input
+    
+    approved_ans = {'A', 'B', 'C', 'D'}  # Define the valid answer choices
+    
+    while True:
+        
+        user_answer = input('').upper()     
+    
+        if user_answer in approved_ans:    # if user input is anything other than A,B,C,D we return an error
+            return user_answer
+        
+        else:
+            print("")
+            print("Invalid input. Please choose a valid answer (A, B, C, or D):")
+    
+    
+    
+# Initializing changing variables per round
+def play_round(lives, current_score, round_num, question_range, points): 
+    
+    used_questions = set() # Creating a set for questions to avoid repetiton
+    Question_num = 1
+
+    print(f"\nWelcome to Round {round_num}!")
+    
+    time.sleep(1)
+
+    while lives > 0 and Question_num <= 4:      
+        
+        # Setting my random value to equal a non-even integer as set up in my .txt files
+        value = random.randint(*question_range)
+
+        while value % 2 == 0 or value in used_questions:
+            value = random.randint(*question_range)
+
+        used_questions.add(value)   # Adding my question to 'used' set
+
+        display_question(Question_num, value)  # Display the question and its MC 
+        correct_answer = answers[value].strip()
+        answer_text = get_user()
+
+        # Add points depending on level if correct, otherwise deduct 1 life    
+        if answer_text == correct_answer:
+            current_score += points
+            print(f'\nCorrect, Nice Job, You have {current_score} points\n')
+        else:
+            lives -= 1
+            if lives > 0:
+                print(f'\nIncorrect. You currently have {current_score} points and {lives} lives left\n')
+
+        Question_num += 1 # Incrementing 1 to get the total number of Question per round
+
+    return lives, current_score # When all 3 rounds are finished return #lives and score
+
+def game(): # Defining the actual game
+    
+    max_score = 31  
+    lives = 4
+    current_score = 0
+
+
+    # Round,range, points in that specific round
+    round_details = [(1, (1, 14), 1), (2, (15, 27), 3), (3, (28, 43), 5)]
+   
+    # Setting my round, range & points per round to these values respectively
+    for round_num, question_range, points in round_details:  
+        
+        # Updating my current score and lives, every round 
+        lives, current_score = play_round(lives, current_score, round_num, question_range, points)
+        
+        
+        # During the rounds if I lose all my lives return the statement
+        if lives == 0:
+            print("")
+            print(f"Game Over, your overall score is {current_score} / {max_score} better luck next time!")
+            break
+    
+        # Print if sucessfully gone through all rounds in comparison to the max
+    if lives > 0:
+        print(f"\nCongratulations! You completed all rounds with a total score of {current_score} / {max_score} max points.")
+
+
+# Calling the function to play again unless user, inputs 'no'
+
+while True:
+    
+    
+        game()
+        print("")
+        play_again = input("Would you like to play again? (yes/no): ").lower()
+
+        if play_again != "yes":
+            print("")
+            print("Thanks for playing.")
+            break
+
